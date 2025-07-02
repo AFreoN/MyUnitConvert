@@ -1,11 +1,13 @@
+
 "use client"
 
 import * as React from "react"
 import { detectFormat, type DetectFormatOutput } from "@/ai/flows/auto-detect-conversion"
-import { converters } from "@/lib/converters"
-import type { Converter } from "@/lib/types"
+import { allConverters } from "@/lib/converters"
+import type { AnyConverter, DataConverter, UnitConverter } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { CommandPalette } from "@/components/command-palette"
+import { UnitConverterView } from "@/components/unit-converter-view"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -33,7 +35,24 @@ import {
   Share2,
   Sparkles,
   Search,
+  Ruler,
+  Weight,
+  Thermometer,
+  AreaChart,
+  Box,
 } from "lucide-react"
+
+// Helper to get an icon for a converter type
+const getConverterIcon = (converter: AnyConverter) => {
+    switch (converter.id) {
+        case 'length': return <Ruler />;
+        case 'mass': return <Weight />;
+        case 'temperature': return <Thermometer />;
+        case 'area': return <AreaChart />;
+        case 'volume': return <Box />;
+        default: return <Sparkles />;
+    }
+}
 
 export default function OmniConvertPage() {
   const { toast } = useToast()
@@ -43,15 +62,15 @@ export default function OmniConvertPage() {
     React.useState<DetectFormatOutput | null>(null)
   const [isDetecting, setIsDetecting] = React.useState(false)
   const [selectedConverter, setSelectedConverter] =
-    React.useState<Converter | null>(converters[0])
+    React.useState<AnyConverter | null>(allConverters[0])
   const [commandPaletteOpen, setCommandPaletteOpen] = React.useState(false)
   const [sidebarSearch, setSidebarSearch] = React.useState("")
   const [copied, setCopied] = React.useState(false)
   const [shared, setShared] = React.useState(false)
 
-  // Debounce for AI detection
+  // Debounce for AI detection for data converters
   React.useEffect(() => {
-    if (!inputData.trim()) {
+    if (selectedConverter?.type !== 'data' || !inputData.trim()) {
       setIsDetecting(false)
       setDetectedFormat(null)
       return
@@ -65,12 +84,12 @@ export default function OmniConvertPage() {
     }, 500)
 
     return () => clearTimeout(handler)
-  }, [inputData])
+  }, [inputData, selectedConverter])
 
-  // Perform conversion
+  // Perform conversion for data converters
   React.useEffect(() => {
-    if (selectedConverter && inputData) {
-      selectedConverter
+    if (selectedConverter?.type === 'data') {
+      (selectedConverter as DataConverter)
         .convert(inputData)
         .then(setOutputData)
         .catch((err) => {
@@ -86,7 +105,7 @@ export default function OmniConvertPage() {
     }
   }, [inputData, selectedConverter, toast])
 
-  // Handle permalinks
+  // Handle permalinks for data converters
   React.useEffect(() => {
     const loadFromHash = () => {
       try {
@@ -94,13 +113,16 @@ export default function OmniConvertPage() {
         if (!hash) return
 
         const [converterId, queryString] = hash.split("?")
-        const targetConverter = converters.find((c) => c.id === converterId)
-        if (targetConverter) setSelectedConverter(targetConverter)
-
-        if (queryString) {
-          const params = new URLSearchParams(queryString)
-          const src = params.get("src")
-          if (src) setInputData(atob(src))
+        const targetConverter = allConverters.find((c) => c.id === converterId)
+        
+        if (targetConverter) {
+            setSelectedConverter(targetConverter)
+            // Only load source for data converters
+            if (targetConverter.type === 'data' && queryString) {
+                const params = new URLSearchParams(queryString)
+                const src = params.get("src")
+                if (src) setInputData(atob(src))
+            }
         }
       } catch (error) {
         console.error("Failed to parse permalink:", error)
@@ -116,18 +138,17 @@ export default function OmniConvertPage() {
     return () => window.removeEventListener("hashchange", loadFromHash)
   }, [toast])
 
+  // Update permalinks for data converters
   React.useEffect(() => {
+    if (selectedConverter?.type !== 'data') return;
+
     const updateHash = () => {
-      if (selectedConverter) {
-        const src = inputData ? `?src=${btoa(inputData)}` : ""
-        const newHash = `#${selectedConverter.id}${src}`
-        if (window.location.hash !== newHash) {
-          // Use replaceState to avoid cluttering browser history
-          window.history.replaceState(null, "", newHash)
-        }
+      const src = inputData ? `?src=${btoa(inputData)}` : ""
+      const newHash = `#${selectedConverter.id}${src}`
+      if (window.location.hash !== newHash) {
+        window.history.replaceState(null, "", newHash)
       }
     }
-    // Debounce hash update
     const handler = setTimeout(updateHash, 1000)
     return () => clearTimeout(handler)
   }, [inputData, selectedConverter])
@@ -160,9 +181,11 @@ export default function OmniConvertPage() {
     })
   }
 
-  const filteredConverters = converters.filter((c) =>
+  const filteredConverters = allConverters.filter((c) =>
     c.name.toLowerCase().includes(sidebarSearch.toLowerCase())
   )
+
+  const isDataConverter = selectedConverter?.type === 'data';
 
   return (
     <SidebarProvider>
@@ -203,7 +226,7 @@ export default function OmniConvertPage() {
                   isActive={selectedConverter?.id === converter.id}
                   tooltip={converter.name}
                 >
-                  <Sparkles />
+                  {getConverterIcon(converter)}
                   <span>{converter.name}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -231,107 +254,114 @@ export default function OmniConvertPage() {
             </Button>
         </header>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-          <Card className="flex flex-col shadow-md">
-            <CardHeader className="flex-row items-center justify-between">
-              <h2 className="text-lg font-semibold font-headline">Input</h2>
-              <div className="relative">
-                {isDetecting && (
-                  <Badge variant="outline" className="pl-6 animate-pulse">
-                    <Loader2 className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 animate-spin" />
-                    Detecting...
-                  </Badge>
-                )}
-                {!isDetecting && detectedFormat?.format && (
-                  <Badge variant="secondary" className="transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
-                    {detectedFormat.format}
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 flex p-0">
-              <Textarea
-                placeholder="Paste your data here..."
-                className="flex-1 resize-none border-0 rounded-none focus-visible:ring-0 shadow-none p-6 text-sm font-mono"
-                value={inputData}
-                onChange={(e) => setInputData(e.target.value)}
-              />
-            </CardContent>
-          </Card>
+        {selectedConverter?.type === 'unit' && (
+            <UnitConverterView converter={selectedConverter as UnitConverter} />
+        )}
 
-          <Tabs defaultValue="converted" className="flex flex-col">
-            <div className="flex items-center justify-between">
-              <TabsList>
-                <TabsTrigger value="converted">Converted</TabsTrigger>
-                <TabsTrigger value="diff">Diff</TabsTrigger>
-                <TabsTrigger value="metadata">Metadata</TabsTrigger>
-              </TabsList>
-              <div className="flex gap-2">
-                 <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleCopy(window.location.href, "share")}
-                    disabled={!inputData}
-                    aria-label="Share Permalink"
-                 >
-                    {shared ? <Check className="text-accent" /> : <Share2 />}
-                 </Button>
-                 <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleCopy(outputData, "output")}
-                    disabled={!outputData}
-                    aria-label="Copy Output"
-                 >
-                    {copied ? <Check className="text-accent" /> : <Copy />}
-                 </Button>
+        {selectedConverter?.type === 'data' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+            <Card className="flex flex-col shadow-md">
+              <CardHeader className="flex-row items-center justify-between">
+                <h2 className="text-lg font-semibold font-headline">Input</h2>
+                <div className="relative">
+                  {isDetecting && (
+                    <Badge variant="outline" className="pl-6 animate-pulse">
+                      <Loader2 className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 animate-spin" />
+                      Detecting...
+                    </Badge>
+                  )}
+                  {!isDetecting && detectedFormat?.format && (
+                    <Badge variant="secondary" className="transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+                      {detectedFormat.format}
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 flex p-0">
+                <Textarea
+                  placeholder="Paste your data here..."
+                  className="flex-1 resize-none border-0 rounded-none focus-visible:ring-0 shadow-none p-6 text-sm font-mono"
+                  value={inputData}
+                  onChange={(e) => setInputData(e.target.value)}
+                />
+              </CardContent>
+            </Card>
+
+            <Tabs defaultValue="converted" className="flex flex-col">
+              <div className="flex items-center justify-between">
+                <TabsList>
+                  <TabsTrigger value="converted">Converted</TabsTrigger>
+                  <TabsTrigger value="diff">Diff</TabsTrigger>
+                  <TabsTrigger value="metadata">Metadata</TabsTrigger>
+                </TabsList>
+                <div className="flex gap-2">
+                   <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleCopy(window.location.href, "share")}
+                      disabled={!inputData}
+                      aria-label="Share Permalink"
+                   >
+                      {shared ? <Check className="text-accent" /> : <Share2 />}
+                   </Button>
+                   <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleCopy(outputData, "output")}
+                      disabled={!outputData}
+                      aria-label="Copy Output"
+                   >
+                      {copied ? <Check className="text-accent" /> : <Copy />}
+                   </Button>
+                </div>
               </div>
-            </div>
-            <TabsContent value="converted" className="flex-1 mt-2">
-              <Card className="h-full flex flex-col shadow-md">
-                <CardContent className="flex-1 flex p-0">
-                  <Textarea
-                    readOnly
-                    placeholder="Output will appear here..."
-                    className="flex-1 resize-none border-0 rounded-none bg-muted/30 focus-visible:ring-0 shadow-none p-6 text-sm font-mono"
-                    value={outputData}
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="diff" className="flex-1 mt-2">
-              <Card className="h-full shadow-md">
-                 <CardContent className="grid grid-cols-2 gap-0 h-full p-0">
-                    <Textarea readOnly value={inputData} placeholder="Input" className="resize-none border-0 rounded-none rounded-bl-md focus-visible:ring-0 shadow-none p-6 text-sm font-mono" />
-                    <Textarea readOnly value={outputData} placeholder="Output" className="resize-none border-0 rounded-none bg-muted/30 rounded-br-md focus-visible:ring-0 shadow-none p-6 text-sm font-mono" />
-                 </CardContent>
-              </Card>
-            </TabsContent>
-            <TabsContent value="metadata" className="flex-1 mt-2">
-               <Card className="h-full shadow-md">
-                 <CardContent className="p-6 space-y-4">
-                    <h3 className="font-headline font-semibold">Conversion Metadata</h3>
-                    {detectedFormat?.format ? (
-                        <div className="text-sm space-y-2 font-mono">
-                            <p><strong>Detected Format:</strong> {detectedFormat.format}</p>
-                            <p><strong>Confidence:</strong> { (detectedFormat.confidence * 100).toFixed(0) }%</p>
+              <TabsContent value="converted" className="flex-1 mt-2">
+                <Card className="h-full flex flex-col shadow-md">
+                  <CardContent className="flex-1 flex p-0">
+                    <Textarea
+                      readOnly
+                      placeholder="Output will appear here..."
+                      className="flex-1 resize-none border-0 rounded-none bg-muted/30 focus-visible:ring-0 shadow-none p-6 text-sm font-mono"
+                      value={outputData}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="diff" className="flex-1 mt-2">
+                <Card className="h-full shadow-md">
+                   <CardContent className="grid grid-cols-2 gap-0 h-full p-0">
+                      <Textarea readOnly value={inputData} placeholder="Input" className="resize-none border-0 rounded-none rounded-bl-md focus-visible:ring-0 shadow-none p-6 text-sm font-mono" />
+                      <Textarea readOnly value={outputData} placeholder="Output" className="resize-none border-0 rounded-none bg-muted/30 rounded-br-md focus-visible:ring-0 shadow-none p-6 text-sm font-mono" />
+                   </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="metadata" className="flex-1 mt-2">
+                 <Card className="h-full shadow-md">
+                   <CardContent className="p-6 space-y-4">
+                      <h3 className="font-headline font-semibold">Conversion Metadata</h3>
+                      {detectedFormat?.format ? (
+                          <div className="text-sm space-y-2 font-mono">
+                              <p><strong>Detected Format:</strong> {detectedFormat.format}</p>
+                              <p><strong>Confidence:</strong> { (detectedFormat.confidence * 100).toFixed(0) }%</p>
+                          </div>
+                      ): (
+                          <p className="text-sm text-muted-foreground">No format detected. Paste some data in the input panel.</p>
+                      )}
+                      
+                      {selectedConverter && (
+                        <div className="text-sm space-y-2 pt-4 border-t">
+                          <h4 className="font-semibold font-headline">Active Converter</h4>
+                          <p className="font-mono"><strong>Name:</strong> {selectedConverter.name}</p>
+                          <p className="text-muted-foreground">{selectedConverter.description}</p>
                         </div>
-                    ): (
-                        <p className="text-sm text-muted-foreground">No format detected. Paste some data in the input panel.</p>
-                    )}
-                    
-                    {selectedConverter && (
-                      <div className="text-sm space-y-2 pt-4 border-t">
-                        <h4 className="font-semibold font-headline">Active Converter</h4>
-                        <p className="font-mono"><strong>Name:</strong> {selectedConverter.name}</p>
-                        <p className="text-muted-foreground">{selectedConverter.description}</p>
-                      </div>
-                    )}
-                 </CardContent>
-               </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+                      )}
+                   </CardContent>
+                 </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+
       </SidebarInset>
     </SidebarProvider>
   )

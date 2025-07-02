@@ -1,32 +1,14 @@
-import type { Converter } from '@/lib/types';
 
-const numberParser = (input: string, convert: (val: number) => number) => {
-  if (input.trim() === '') return '';
-  const value = parseFloat(input);
-  if (isNaN(value)) {
-    return 'Invalid input: must be a number.';
-  }
-  const result = convert(value);
+import type { DataConverter, UnitConverter, AnyConverter } from '@/lib/types';
 
-  // Avoid scientific notation for small/large numbers and fix precision
-  if (Math.abs(result) < 1e-6 && result !== 0) {
-      return result.toExponential(4);
-  }
-  // Smart precision for floating point numbers
-  if (result.toString().includes('.')) {
-    const integerPartLength = Math.trunc(result).toString().length;
-    const precision = Math.max(0, 8 - integerPartLength);
-    return result.toFixed(precision);
-  }
-  return result.toString();
-};
+// --- Data Format Converters ---
 
-
-export const converters: Converter[] = [
+const dataConverters: DataConverter[] = [
     {
         id: 'json-to-yaml',
         name: 'JSON to YAML',
         description: 'Convert JSON data to YAML format.',
+        type: 'data',
         convert: async (input) => {
             try {
                 if (!input.trim()) return '';
@@ -61,6 +43,7 @@ export const converters: Converter[] = [
         id: 'yaml-to-json',
         name: 'YAML to JSON',
         description: 'Convert YAML data to JSON format (basic).',
+        type: 'data',
         convert: async (input) => {
             // This is a very basic mock, not a real parser.
             try {
@@ -86,6 +69,7 @@ export const converters: Converter[] = [
         id: 'base64-encode',
         name: 'Base64 Encode',
         description: 'Encode text to Base64.',
+        type: 'data',
         convert: async (input) => {
             try {
                 if (typeof window !== 'undefined') {
@@ -101,6 +85,7 @@ export const converters: Converter[] = [
         id: 'base64-decode',
         name: 'Base64 Decode',
         description: 'Decode Base64 to text.',
+        type: 'data',
         convert: async (input) => {
             try {
                 if (typeof window !== 'undefined') {
@@ -116,12 +101,14 @@ export const converters: Converter[] = [
         id: 'url-encode',
         name: 'URL Encode',
         description: 'Encode text for use in URLs.',
+        type: 'data',
         convert: async (input) => encodeURIComponent(input),
     },
     {
         id: 'url-decode',
         name: 'URL Decode',
         description: 'Decode URL-encoded text.',
+        type: 'data',
         convert: async (input) => {
             try {
                 return decodeURIComponent(input);
@@ -130,172 +117,73 @@ export const converters: Converter[] = [
             }
         },
     },
-
-    // --- Unit Converters ---
-
-    // Length / Distance
-    {
-        id: 'metre-to-kilometre',
-        name: 'Metre to Kilometre',
-        description: 'm → km',
-        convert: async (input) => numberParser(input, (n) => n / 1000),
-    },
-    {
-        id: 'kilometre-to-metre',
-        name: 'Kilometre to Metre',
-        description: 'km → m',
-        convert: async (input) => numberParser(input, (n) => n * 1000),
-    },
-    {
-        id: 'metre-to-foot',
-        name: 'Metre to Foot',
-        description: 'm → ft',
-        convert: async (input) => numberParser(input, (n) => n * 3.28084),
-    },
-    {
-        id: 'foot-to-metre',
-        name: 'Foot to Metre',
-        description: 'ft → m',
-        convert: async (input) => numberParser(input, (n) => n / 3.28084),
-    },
-    {
-        id: 'metre-to-inch',
-        name: 'Metre to Inch',
-        description: 'm → in',
-        convert: async (input) => numberParser(input, (n) => n * 39.3701),
-    },
-    {
-        id: 'inch-to-metre',
-        name: 'Inch to Metre',
-        description: 'in → m',
-        convert: async (input) => numberParser(input, (n) => n / 39.3701),
-    },
-    {
-        id: 'mile-to-kilometre',
-        name: 'Mile to Kilometre',
-        description: 'mi → km',
-        convert: async (input) => numberParser(input, (n) => n * 1.60934),
-    },
-    {
-        id: 'kilometre-to-mile',
-        name: 'Kilometre to Mile',
-        description: 'km → mi',
-        convert: async (input) => numberParser(input, (n) => n / 1.60934),
-    },
-
-    // Area
-    {
-        id: 'sqmetre-to-sqfoot',
-        name: 'Square Metre to Square Foot',
-        description: 'm² → ft²',
-        convert: async (input) => numberParser(input, (n) => n * 10.764),
-    },
-    {
-        id: 'sqfoot-to-sqmetre',
-        name: 'Square Foot to Square Metre',
-        description: 'ft² → m²',
-        convert: async (input) => numberParser(input, (n) => n / 10.764),
-    },
-    {
-        id: 'acre-to-hectare',
-        name: 'Acre to Hectare',
-        description: 'ac → ha',
-        convert: async (input) => numberParser(input, (n) => n / 2.471),
-    },
-    {
-        id: 'hectare-to-acre',
-        name: 'Hectare to Acre',
-        description: 'ha → ac',
-        convert: async (input) => numberParser(input, (n) => n * 2.471),
-    },
-
-    // Volume / Capacity
-    {
-        id: 'litre-to-millilitre',
-        name: 'Litre to Millilitre',
-        description: 'L → mL',
-        convert: async (input) => numberParser(input, (n) => n * 1000),
-    },
-    {
-        id: 'millilitre-to-litre',
-        name: 'Millilitre to Litre',
-        description: 'mL → L',
-        convert: async (input) => numberParser(input, (n) => n / 1000),
-    },
-    {
-        id: 'usgallon-to-litre',
-        name: 'US Gallon to Litre',
-        description: 'gal (US) → L',
-        convert: async (input) => numberParser(input, (n) => n * 3.78541),
-    },
-    {
-        id: 'litre-to-usgallon',
-        name: 'Litre to US Gallon',
-        description: 'L → gal (US)',
-        convert: async (input) => numberParser(input, (n) => n / 3.78541),
-    },
-
-    // Mass / Weight
-    {
-        id: 'gram-to-kilogram',
-        name: 'Gram to Kilogram',
-        description: 'g → kg',
-        convert: async (input) => numberParser(input, (n) => n / 1000),
-    },
-    {
-        id: 'kilogram-to-gram',
-        name: 'Kilogram to Gram',
-        description: 'kg → g',
-        convert: async (input) => numberParser(input, (n) => n * 1000),
-    },
-    {
-        id: 'pound-to-kilogram',
-        name: 'Pound to Kilogram',
-        description: 'lb → kg',
-        convert: async (input) => numberParser(input, (n) => n / 2.20462),
-    },
-    {
-        id: 'kilogram-to-pound',
-        name: 'Kilogram to Pound',
-        description: 'kg → lb',
-        convert: async (input) => numberParser(input, (n) => n * 2.20462),
-    },
-    {
-        id: 'ounce-to-gram',
-        name: 'Ounce to Gram',
-        description: 'oz → g',
-        convert: async (input) => numberParser(input, (n) => n * 28.3495),
-    },
-    {
-        id: 'gram-to-ounce',
-        name: 'Gram to Ounce',
-        description: 'g → oz',
-        convert: async (input) => numberParser(input, (n) => n / 28.3495),
-    },
-
-    // Temperature
-    {
-        id: 'celsius-to-fahrenheit',
-        name: 'Celsius to Fahrenheit',
-        description: '°C → °F',
-        convert: async (input) => numberParser(input, (n) => (n * 9/5) + 32),
-    },
-    {
-        id: 'fahrenheit-to-celsius',
-        name: 'Fahrenheit to Celsius',
-        description: '°F → °C',
-        convert: async (input) => numberParser(input, (n) => (n - 32) * 5/9),
-    },
-    {
-        id: 'celsius-to-kelvin',
-        name: 'Celsius to Kelvin',
-        description: '°C → K',
-        convert: async (input) => numberParser(input, (n) => n + 273.15),
-    },
-    {
-        id: 'kelvin-to-celsius',
-        name: 'Kelvin to Celsius',
-        description: 'K → °C',
-        convert: async (input) => numberParser(input, (n) => n - 273.15),
-    },
 ];
+
+// --- Unit Converters ---
+
+const unitConverters: UnitConverter[] = [
+    {
+        id: 'length',
+        name: 'Length',
+        description: 'Convert between different units of length.',
+        type: 'unit',
+        units: [
+            { id: 'm', name: 'Metre', toBase: v => v, fromBase: v => v },
+            { id: 'km', name: 'Kilometre', toBase: v => v * 1000, fromBase: v => v / 1000 },
+            { id: 'mi', name: 'Mile', toBase: v => v * 1609.34, fromBase: v => v / 1609.34 },
+            { id: 'in', name: 'Inch', toBase: v => v * 0.0254, fromBase: v => v / 0.0254 },
+            { id: 'ft', name: 'Foot', toBase: v => v * 0.3048, fromBase: v => v / 0.3048 },
+        ]
+    },
+    {
+        id: 'mass',
+        name: 'Mass',
+        description: 'Convert between different units of mass.',
+        type: 'unit',
+        units: [
+            { id: 'kg', name: 'Kilogram', toBase: v => v, fromBase: v => v },
+            { id: 'g', name: 'Gram', toBase: v => v / 1000, fromBase: v => v * 1000 },
+            { id: 't', name: 'Tonne', toBase: v => v * 1000, fromBase: v => v / 1000 },
+            { id: 'lb', name: 'Pound', toBase: v => v * 0.453592, fromBase: v => v / 0.453592 },
+            { id: 'oz', name: 'Ounce', toBase: v => v * 0.0283495, fromBase: v => v / 0.0283495 },
+        ]
+    },
+    {
+        id: 'area',
+        name: 'Area',
+        description: 'Convert between different units of area.',
+        type: 'unit',
+        units: [
+            { id: 'sqm', name: 'Square Metre', toBase: v => v, fromBase: v => v },
+            { id: 'sqft', name: 'Square Foot', toBase: v => v * 0.092903, fromBase: v => v / 0.092903 },
+            { id: 'acre', name: 'Acre', toBase: v => v * 4046.86, fromBase: v => v / 4046.86 },
+            { id: 'ha', name: 'Hectare', toBase: v => v * 10000, fromBase: v => v / 10000 },
+        ]
+    },
+    {
+        id: 'volume',
+        name: 'Volume',
+        description: 'Convert between different units of volume.',
+        type: 'unit',
+        units: [
+            { id: 'l', name: 'Litre', toBase: v => v, fromBase: v => v },
+            { id: 'ml', name: 'Millilitre', toBase: v => v / 1000, fromBase: v => v * 1000 },
+            { id: 'us-gal', name: 'US Gallon', toBase: v => v * 3.78541, fromBase: v => v / 3.78541 },
+            { id: 'uk-gal', name: 'UK Gallon', toBase: v => v * 4.54609, fromBase: v => v / 4.54609 },
+            { id: 'm3', name: 'Cubic Metre', toBase: v => v * 1000, fromBase: v => v / 1000 },
+        ]
+    },
+    {
+        id: 'temperature',
+        name: 'Temperature',
+        description: 'Convert between different units of temperature.',
+        type: 'unit',
+        units: [
+            { id: 'c', name: 'Celsius', toBase: v => v, fromBase: v => v },
+            { id: 'f', name: 'Fahrenheit', toBase: v => (v - 32) * 5/9, fromBase: v => (v * 9/5) + 32 },
+            { id: 'k', name: 'Kelvin', toBase: v => v - 273.15, fromBase: v => v + 273.15 },
+        ]
+    }
+];
+
+export const allConverters: AnyConverter[] = [...dataConverters, ...unitConverters];

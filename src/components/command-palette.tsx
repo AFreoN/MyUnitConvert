@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -9,14 +10,25 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { converters } from "@/lib/converters"
-import type { Converter } from "@/lib/types"
-import { Search, Sparkles } from "lucide-react"
+import { allConverters } from "@/lib/converters"
+import type { AnyConverter } from "@/lib/types"
+import { Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box } from "lucide-react"
 
 interface CommandPaletteProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelectConverter: (converter: Converter) => void
+  onSelectConverter: (converter: AnyConverter) => void
+}
+
+const getConverterIcon = (converter: AnyConverter) => {
+    switch (converter.id) {
+        case 'length': return <Ruler className="h-5 w-5 text-accent-foreground" />;
+        case 'mass': return <Weight className="h-5 w-5 text-accent-foreground" />;
+        case 'temperature': return <Thermometer className="h-5 w-5 text-accent-foreground" />;
+        case 'area': return <AreaChart className="h-5 w-5 text-accent-foreground" />;
+        case 'volume': return <Box className="h-5 w-5 text-accent-foreground" />;
+        default: return <Sparkles className="h-5 w-5 text-accent-foreground" />;
+    }
 }
 
 export function CommandPalette({
@@ -32,7 +44,7 @@ export function CommandPalette({
     }
   }, [open])
 
-  const filteredConverters = converters.filter(
+  const filteredConverters = allConverters.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.description.toLowerCase().includes(search.toLowerCase())
@@ -65,7 +77,7 @@ export function CommandPalette({
                         onClick={() => onSelectConverter(converter)}
                         className="flex items-center gap-3 p-3 rounded-md hover:bg-accent cursor-pointer"
                     >
-                        <Sparkles className="h-5 w-5 text-accent-foreground" />
+                        {getConverterIcon(converter)}
                         <div>
                         <p className="font-semibold">{converter.name}</p>
                         <p className="text-sm text-muted-foreground">
