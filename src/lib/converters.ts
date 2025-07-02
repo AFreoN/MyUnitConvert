@@ -1,5 +1,27 @@
 import type { Converter } from '@/lib/types';
 
+const numberParser = (input: string, convert: (val: number) => number) => {
+  if (input.trim() === '') return '';
+  const value = parseFloat(input);
+  if (isNaN(value)) {
+    return 'Invalid input: must be a number.';
+  }
+  const result = convert(value);
+
+  // Avoid scientific notation for small/large numbers and fix precision
+  if (Math.abs(result) < 1e-6 && result !== 0) {
+      return result.toExponential(4);
+  }
+  // Smart precision for floating point numbers
+  if (result.toString().includes('.')) {
+    const integerPartLength = Math.trunc(result).toString().length;
+    const precision = Math.max(0, 8 - integerPartLength);
+    return result.toFixed(precision);
+  }
+  return result.toString();
+};
+
+
 export const converters: Converter[] = [
     {
         id: 'json-to-yaml',
@@ -107,5 +129,173 @@ export const converters: Converter[] = [
                 return 'Invalid URL-encoded string.'
             }
         },
+    },
+
+    // --- Unit Converters ---
+
+    // Length / Distance
+    {
+        id: 'metre-to-kilometre',
+        name: 'Metre to Kilometre',
+        description: 'm → km',
+        convert: async (input) => numberParser(input, (n) => n / 1000),
+    },
+    {
+        id: 'kilometre-to-metre',
+        name: 'Kilometre to Metre',
+        description: 'km → m',
+        convert: async (input) => numberParser(input, (n) => n * 1000),
+    },
+    {
+        id: 'metre-to-foot',
+        name: 'Metre to Foot',
+        description: 'm → ft',
+        convert: async (input) => numberParser(input, (n) => n * 3.28084),
+    },
+    {
+        id: 'foot-to-metre',
+        name: 'Foot to Metre',
+        description: 'ft → m',
+        convert: async (input) => numberParser(input, (n) => n / 3.28084),
+    },
+    {
+        id: 'metre-to-inch',
+        name: 'Metre to Inch',
+        description: 'm → in',
+        convert: async (input) => numberParser(input, (n) => n * 39.3701),
+    },
+    {
+        id: 'inch-to-metre',
+        name: 'Inch to Metre',
+        description: 'in → m',
+        convert: async (input) => numberParser(input, (n) => n / 39.3701),
+    },
+    {
+        id: 'mile-to-kilometre',
+        name: 'Mile to Kilometre',
+        description: 'mi → km',
+        convert: async (input) => numberParser(input, (n) => n * 1.60934),
+    },
+    {
+        id: 'kilometre-to-mile',
+        name: 'Kilometre to Mile',
+        description: 'km → mi',
+        convert: async (input) => numberParser(input, (n) => n / 1.60934),
+    },
+
+    // Area
+    {
+        id: 'sqmetre-to-sqfoot',
+        name: 'Square Metre to Square Foot',
+        description: 'm² → ft²',
+        convert: async (input) => numberParser(input, (n) => n * 10.764),
+    },
+    {
+        id: 'sqfoot-to-sqmetre',
+        name: 'Square Foot to Square Metre',
+        description: 'ft² → m²',
+        convert: async (input) => numberParser(input, (n) => n / 10.764),
+    },
+    {
+        id: 'acre-to-hectare',
+        name: 'Acre to Hectare',
+        description: 'ac → ha',
+        convert: async (input) => numberParser(input, (n) => n / 2.471),
+    },
+    {
+        id: 'hectare-to-acre',
+        name: 'Hectare to Acre',
+        description: 'ha → ac',
+        convert: async (input) => numberParser(input, (n) => n * 2.471),
+    },
+
+    // Volume / Capacity
+    {
+        id: 'litre-to-millilitre',
+        name: 'Litre to Millilitre',
+        description: 'L → mL',
+        convert: async (input) => numberParser(input, (n) => n * 1000),
+    },
+    {
+        id: 'millilitre-to-litre',
+        name: 'Millilitre to Litre',
+        description: 'mL → L',
+        convert: async (input) => numberParser(input, (n) => n / 1000),
+    },
+    {
+        id: 'usgallon-to-litre',
+        name: 'US Gallon to Litre',
+        description: 'gal (US) → L',
+        convert: async (input) => numberParser(input, (n) => n * 3.78541),
+    },
+    {
+        id: 'litre-to-usgallon',
+        name: 'Litre to US Gallon',
+        description: 'L → gal (US)',
+        convert: async (input) => numberParser(input, (n) => n / 3.78541),
+    },
+
+    // Mass / Weight
+    {
+        id: 'gram-to-kilogram',
+        name: 'Gram to Kilogram',
+        description: 'g → kg',
+        convert: async (input) => numberParser(input, (n) => n / 1000),
+    },
+    {
+        id: 'kilogram-to-gram',
+        name: 'Kilogram to Gram',
+        description: 'kg → g',
+        convert: async (input) => numberParser(input, (n) => n * 1000),
+    },
+    {
+        id: 'pound-to-kilogram',
+        name: 'Pound to Kilogram',
+        description: 'lb → kg',
+        convert: async (input) => numberParser(input, (n) => n / 2.20462),
+    },
+    {
+        id: 'kilogram-to-pound',
+        name: 'Kilogram to Pound',
+        description: 'kg → lb',
+        convert: async (input) => numberParser(input, (n) => n * 2.20462),
+    },
+    {
+        id: 'ounce-to-gram',
+        name: 'Ounce to Gram',
+        description: 'oz → g',
+        convert: async (input) => numberParser(input, (n) => n * 28.3495),
+    },
+    {
+        id: 'gram-to-ounce',
+        name: 'Gram to Ounce',
+        description: 'g → oz',
+        convert: async (input) => numberParser(input, (n) => n / 28.3495),
+    },
+
+    // Temperature
+    {
+        id: 'celsius-to-fahrenheit',
+        name: 'Celsius to Fahrenheit',
+        description: '°C → °F',
+        convert: async (input) => numberParser(input, (n) => (n * 9/5) + 32),
+    },
+    {
+        id: 'fahrenheit-to-celsius',
+        name: 'Fahrenheit to Celsius',
+        description: '°F → °C',
+        convert: async (input) => numberParser(input, (n) => (n - 32) * 5/9),
+    },
+    {
+        id: 'celsius-to-kelvin',
+        name: 'Celsius to Kelvin',
+        description: '°C → K',
+        convert: async (input) => numberParser(input, (n) => n + 273.15),
+    },
+    {
+        id: 'kelvin-to-celsius',
+        name: 'Kelvin to Celsius',
+        description: 'K → °C',
+        convert: async (input) => numberParser(input, (n) => n - 273.15),
     },
 ];
