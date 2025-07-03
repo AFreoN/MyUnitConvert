@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import path from 'path';
 
 const isGithubActions = process.env.GITHUB_ACTIONS === 'true';
 
@@ -30,6 +31,19 @@ const nextConfig: NextConfig = {
     basePath: `/${repo}`,
     assetPrefix: `/${repo}/`,
   }),
+  // Add webpack config to stub out server actions for static export
+  webpack: (config, { isServer }) => {
+    if (process.env.NEXT_PUBLIC_IS_GHPAGES === 'true' && !isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@/ai/flows/auto-detect-conversion': path.resolve(
+          __dirname,
+          'src/ai/flows/auto-detect-conversion.dummy.ts'
+        ),
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
