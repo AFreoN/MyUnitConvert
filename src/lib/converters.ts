@@ -1,4 +1,5 @@
 
+import { parse, stringify } from 'yaml';
 import type { DataConverter, UnitConverter, AnyConverter } from '@/lib/types';
 
 // --- Data Format Converters ---
@@ -13,26 +14,7 @@ export const dataConverters: DataConverter[] = [
             try {
                 if (!input.trim()) return '';
                 const obj = JSON.parse(input);
-                
-                // This is a naive implementation for demonstration purposes.
-                const toYaml = (data: any, level: number): string => {
-                    const indentStr = '  '.repeat(level);
-                    if (data === null) return 'null';
-                    if (typeof data === 'string') return `${data}`;
-                    if (typeof data === 'number' || typeof data === 'boolean') return String(data);
-                    if (Array.isArray(data)) {
-                        if (data.length === 0) return '[]';
-                        return data.map(item => `\n${indentStr}- ${toYaml(item, level + 1).trimStart()}`).join('');
-                    }
-                    if (typeof data === 'object') {
-                        if (Object.keys(data).length === 0) return '{}';
-                        return Object.entries(data)
-                            .map(([key, value]) => `\n${indentStr}${key}: ${toYaml(value, level + 1).trimStart()}`)
-                            .join('');
-                    }
-                    return String(data);
-                };
-                return toYaml(obj, 0).trim();
+                return stringify(obj);
             } catch (e) {
                 if (e instanceof Error) return `# Invalid JSON: ${e.message}`;
                 return '# Invalid JSON input';
@@ -42,22 +24,12 @@ export const dataConverters: DataConverter[] = [
     {
         id: 'yaml-to-json',
         name: 'YAML to JSON',
-        description: 'Convert YAML data to JSON format (basic).',
+        description: 'Convert YAML data to JSON format.',
         type: 'data',
         convert: async (input) => {
-            // This is a very basic mock, not a real parser.
             try {
                 if (!input.trim()) return '';
-                const lines = input.split('\n').filter(line => line.trim() && !line.trim().startsWith('#'));
-                const obj: Record<string, any> = {};
-                lines.forEach(line => {
-                    const parts = line.split(':');
-                    if (parts.length > 1) {
-                        const key = parts[0].trim();
-                        const value = parts.slice(1).join(':').trim();
-                        obj[key] = value;
-                    }
-                });
+                const obj = parse(input);
                 return JSON.stringify(obj, null, 2);
             } catch (e) {
                  if (e instanceof Error) return `{\n  "error": "Could not parse YAML: ${e.message}"\n}`;
