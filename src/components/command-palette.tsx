@@ -15,7 +15,8 @@ import type { AnyConverter } from "@/lib/types"
 import { 
     Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box, Clock,
     Gauge, Compass, BatteryCharging, Zap, Database, Layers, Flame, Workflow,
-    Waves, Move, Signal, Fuel, Sun, Bolt, Scaling, RotateCw
+    Waves, Move, Signal, Fuel, Sun, Bolt, Scaling, RotateCw, ArrowRightLeft,
+    ScanLine, Monitor, Magnet, AlertTriangle, Volume2, Type, CircuitBoard, Lightbulb
 } from "lucide-react"
 
 interface CommandPaletteProps {
@@ -44,12 +45,21 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'fuel-consumption': return <Fuel {...iconProps}/>;
         case 'acceleration': return <Gauge {...iconProps}/>;
         case 'charge': return <BatteryCharging {...iconProps}/>;
-        case 'current': return <Zap {...iconProps}/>;
         case 'density': return <Layers {...iconProps}/>;
         case 'flow-mass': return <Workflow {...iconProps}/>;
         case 'flow-volume': return <Waves {...iconProps}/>;
         case 'illumination': return <Sun {...iconProps}/>;
         case 'torque': return <RotateCw {...iconProps}/>;
+        case 'current': return <Zap {...iconProps}/>;
+        case 'data-transfer': return <ArrowRightLeft {...iconProps}/>;
+        case 'digital-image-resolution': return <ScanLine {...iconProps}/>;
+        case 'luminance': return <Monitor {...iconProps}/>;
+        case 'permeability': return <Magnet {...iconProps}/>;
+        case 'radiation': return <AlertTriangle {...iconProps}/>;
+        case 'sound': return <Volume2 {...iconProps}/>;
+        case 'typography': return <Type {...iconProps}/>;
+        case 'inductance': return <CircuitBoard {...iconProps}/>;
+        case 'electric-conductance': return <Lightbulb {...iconProps}/>;
         default: return <Sparkles {...iconProps}/>;
     }
 }

@@ -480,6 +480,151 @@ export const unitConverters: UnitConverter[] = [
             { id: 'n-cm', name: 'Newton-centimetre', toBase: v => v / 100, fromBase: v => v * 100 },
         ],
     },
+    {
+        id: 'current',
+        name: 'Current',
+        description: 'Convert units of electrical current.',
+        type: 'unit',
+        defaultFrom: 'a',
+        defaultTo: 'ma',
+        units: [
+            { id: 'a', name: 'Ampere', toBase: v => v, fromBase: v => v },
+            { id: 'ma', name: 'Milliampere', toBase: v => v / 1000, fromBase: v => v * 1000 },
+            { id: 'ka', name: 'Kiloampere', toBase: v => v * 1000, fromBase: v => v / 1000 },
+            { id: 'bi', name: 'Biot (abampere)', toBase: v => v * 10, fromBase: v => v / 10 },
+        ]
+    },
+    {
+        id: 'data-transfer',
+        name: 'Data Transfer Rate',
+        description: 'Convert units of data transfer speed.',
+        type: 'unit',
+        defaultFrom: 'mbps',
+        defaultTo: 'kbps',
+        units: [
+            { id: 'bps', name: 'Bits per second', toBase: v => v, fromBase: v => v },
+            { id: 'Bps', name: 'Bytes per second', toBase: v => v * 8, fromBase: v => v / 8 },
+            { id: 'kbps', name: 'Kilobits per second', toBase: v => v * 1e3, fromBase: v => v / 1e3 },
+            { id: 'kBps', name: 'Kilobytes per second', toBase: v => v * 8 * 1e3, fromBase: v => v / (8 * 1e3) },
+            { id: 'mbps', name: 'Megabits per second', toBase: v => v * 1e6, fromBase: v => v / 1e6 },
+            { id: 'mBps', name: 'Megabytes per second', toBase: v => v * 8 * 1e6, fromBase: v => v / (8 * 1e6) },
+            { id: 'gbps', name: 'Gigabits per second', toBase: v => v * 1e9, fromBase: v => v / 1e9 },
+            { id: 'gBps', name: 'Gigabytes per second', toBase: v => v * 8 * 1e9, fromBase: v => v / (8 * 1e9) },
+            { id: 'tbps', name: 'Terabits per second', toBase: v => v * 1e12, fromBase: v => v / 1e12 },
+            { id: 'tBps', name: 'Terabytes per second', toBase: v => v * 8 * 1e12, fromBase: v => v / (8 * 1e12) },
+        ]
+    },
+    {
+        id: 'digital-image-resolution',
+        name: 'Digital Image Resolution',
+        description: 'Convert units of image resolution.',
+        type: 'unit',
+        defaultFrom: 'dpi',
+        defaultTo: 'dpcm',
+        units: [
+            { id: 'dpi', name: 'Dots per inch', toBase: v => v, fromBase: v => v },
+            { id: 'dpcm', name: 'Dots per centimeter', toBase: v => v * 2.54, fromBase: v => v / 2.54 },
+            { id: 'dpm', name: 'Dots per meter', toBase: v => v * 0.0254, fromBase: v => v / 0.0254 },
+        ]
+    },
+    {
+        id: 'luminance',
+        name: 'Luminance',
+        description: 'Convert units of luminance.',
+        type: 'unit',
+        defaultFrom: 'cd-pm2',
+        defaultTo: 'ft-L',
+        units: [
+            { id: 'cd-pm2', name: 'Candela/square meter (Nit)', toBase: v => v, fromBase: v => v },
+            { id: 'cd-pcm2', name: 'Candela/square centimeter (Stilb)', toBase: v => v * 10000, fromBase: v => v / 10000 },
+            { id: 'cd-pft2', name: 'Candela/square foot', toBase: v => v * 10.7639, fromBase: v => v / 10.7639 },
+            { id: 'ft-L', name: 'Foot-lambert', toBase: v => v * 3.42626, fromBase: v => v / 3.42626 },
+            { id: 'L', name: 'Lambert', toBase: v => v * 3183.1, fromBase: v => v / 3183.1 },
+        ]
+    },
+    {
+        id: 'permeability',
+        name: 'Permeability',
+        description: 'Convert units of magnetic permeability.',
+        type: 'unit',
+        defaultFrom: 'h-pm',
+        defaultTo: 'mu0',
+        units: [
+            { id: 'h-pm', name: 'Henry/meter', toBase: v => v, fromBase: v => v },
+            { id: 'mu0', name: 'Vacuum Permeability (μ₀)', toBase: v => v * 4 * Math.PI * 1e-7, fromBase: v => v / (4 * Math.PI * 1e-7) },
+            { id: 'N-pA2', name: 'Newton/square ampere', toBase: v => v, fromBase: v => v },
+        ]
+    },
+    {
+        id: 'radiation',
+        name: 'Radiation Dose',
+        description: 'Convert units of radiation dose. Assumes a quality factor of 1.',
+        type: 'unit',
+        defaultFrom: 'gy',
+        defaultTo: 'sv',
+        units: [
+            { id: 'gy', name: 'Gray (Gy)', toBase: v => v, fromBase: v => v },
+            { id: 'sv', name: 'Sievert (Sv)', toBase: v => v, fromBase: v => v },
+            { id: 'rad', name: 'Rad', toBase: v => v / 100, fromBase: v => v * 100 },
+            { id: 'rem', name: 'Rem', toBase: v => v / 100, fromBase: v => v * 100 },
+        ]
+    },
+    {
+        id: 'sound',
+        name: 'Sound Level',
+        description: 'Convert between sound pressure level units.',
+        type: 'unit',
+        defaultFrom: 'db-spl',
+        defaultTo: 'pa',
+        units: [
+            { id: 'db-spl', name: 'Decibel (SPL)', toBase: v => 20e-6 * Math.pow(10, v / 20), fromBase: v => 20 * Math.log10(v / 20e-6) },
+            { id: 'pa', name: 'Pascal (Pa)', toBase: v => v, fromBase: v => v },
+        ]
+    },
+    {
+        id: 'typography',
+        name: 'Typography',
+        description: 'Convert between typography units.',
+        type: 'unit',
+        defaultFrom: 'px',
+        defaultTo: 'pt',
+        units: [
+            { id: 'pt', name: 'Point', toBase: v => v, fromBase: v => v },
+            { id: 'px', name: 'Pixel', toBase: v => v * (72 / 96), fromBase: v => v * (96 / 72) },
+            { id: 'in', name: 'Inch', toBase: v => v * 72, fromBase: v => v / 72 },
+            { id: 'cm', name: 'Centimeter', toBase: v => v * (72 / 2.54), fromBase: v => v * (2.54 / 72) },
+            { id: 'pc', name: 'Pica', toBase: v => v * 12, fromBase: v => v / 12 },
+            { id: 'twip', name: 'Twip', toBase: v => v / 20, fromBase: v => v * 20 },
+        ]
+    },
+    {
+        id: 'inductance',
+        name: 'Inductance',
+        description: 'Convert units of electrical inductance.',
+        type: 'unit',
+        defaultFrom: 'h',
+        defaultTo: 'mh',
+        units: [
+            { id: 'h', name: 'Henry', toBase: v => v, fromBase: v => v },
+            { id: 'mh', name: 'Millihenry', toBase: v => v / 1e3, fromBase: v => v * 1e3 },
+            { id: 'uh', name: 'Microhenry', toBase: v => v / 1e6, fromBase: v => v * 1e6 },
+            { id: 'nh', name: 'Nanohenry', toBase: v => v / 1e9, fromBase: v => v * 1e9 },
+        ]
+    },
+    {
+        id: 'electric-conductance',
+        name: 'Electric Conductance',
+        description: 'Convert units of electrical conductance.',
+        type: 'unit',
+        defaultFrom: 's',
+        defaultTo: 'ms',
+        units: [
+            { id: 's', name: 'Siemens', toBase: v => v, fromBase: v => v },
+            { id: 'ms', name: 'Millisiemens', toBase: v => v / 1e3, fromBase: v => v * 1e3 },
+            { id: 'us', name: 'Microsiemens', toBase: v => v / 1e6, fromBase: v => v * 1e6 },
+            { id: 'mho', name: 'Mho', toBase: v => v, fromBase: v => v },
+        ]
+    },
 ];
 
 export const allConverters: AnyConverter[] = [...unitConverters, ...dataConverters];

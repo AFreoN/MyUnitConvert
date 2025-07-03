@@ -59,6 +59,15 @@ import {
   Bolt,
   Scaling,
   RotateCw,
+  ArrowRightLeft,
+  ScanLine,
+  Monitor,
+  Magnet,
+  AlertTriangle,
+  Volume2,
+  Type,
+  CircuitBoard,
+  Lightbulb,
 } from "lucide-react"
 
 // Helper to get an icon for a converter type
@@ -81,12 +90,21 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'fuel-consumption': return <Fuel />;
         case 'acceleration': return <Gauge />;
         case 'charge': return <BatteryCharging />;
-        case 'current': return <Zap />;
         case 'density': return <Layers />;
         case 'flow-mass': return <Workflow />;
         case 'flow-volume': return <Waves />;
         case 'illumination': return <Sun />;
         case 'torque': return <RotateCw />;
+        case 'current': return <Zap />;
+        case 'data-transfer': return <ArrowRightLeft />;
+        case 'digital-image-resolution': return <ScanLine />;
+        case 'luminance': return <Monitor />;
+        case 'permeability': return <Magnet />;
+        case 'radiation': return <AlertTriangle />;
+        case 'sound': return <Volume2 />;
+        case 'typography': return <Type />;
+        case 'inductance': return <CircuitBoard />;
+        case 'electric-conductance': return <Lightbulb />;
         default: return <Sparkles />;
     }
 }
