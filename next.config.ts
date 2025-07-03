@@ -1,7 +1,13 @@
+
 import type {NextConfig} from 'next';
 
+const repoName = 'myunitconvert';
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export',
+  // If your repository is named something else, change 'myunitconvert' to your repository name.
+  basePath: `/${repoName}`,
+  assetPrefix: `/${repoName}/`,
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -9,6 +15,8 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    // Image optimization is not supported for static exports.
+    unoptimized: true, 
     remotePatterns: [
       {
         protocol: 'https',
