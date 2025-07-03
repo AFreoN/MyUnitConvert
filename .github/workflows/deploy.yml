@@ -38,9 +38,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Export static HTML
-        run: npm run export
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
