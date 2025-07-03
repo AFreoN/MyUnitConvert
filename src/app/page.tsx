@@ -43,6 +43,22 @@ import {
   AreaChart,
   Box,
   Clock,
+  Gauge,
+  Compass,
+  BatteryCharging,
+  Zap,
+  Database,
+  Layers,
+  Flame,
+  Workflow,
+  Waves,
+  Move,
+  Signal,
+  Fuel,
+  Sun,
+  Bolt,
+  Scaling,
+  RotateCw,
 } from "lucide-react"
 
 // Helper to get an icon for a converter type
@@ -54,6 +70,23 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'area': return <AreaChart />;
         case 'volume': return <Box />;
         case 'time': return <Clock />;
+        case 'speed': return <Gauge />;
+        case 'pressure': return <Scaling />;
+        case 'energy': return <Flame />;
+        case 'power': return <Bolt />;
+        case 'force': return <Move />;
+        case 'angle': return <Compass />;
+        case 'frequency': return <Signal />;
+        case 'data-storage': return <Database />;
+        case 'fuel-consumption': return <Fuel />;
+        case 'acceleration': return <Gauge />;
+        case 'charge': return <BatteryCharging />;
+        case 'current': return <Zap />;
+        case 'density': return <Layers />;
+        case 'flow-mass': return <Workflow />;
+        case 'flow-volume': return <Waves />;
+        case 'illumination': return <Sun />;
+        case 'torque': return <RotateCw />;
         default: return <Sparkles />;
     }
 }
@@ -403,3 +436,5 @@ export default function OmniConvertPage() {
     </SidebarProvider>
   )
 }
+
+    

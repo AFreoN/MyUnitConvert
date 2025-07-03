@@ -12,7 +12,11 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { allConverters } from "@/lib/converters"
 import type { AnyConverter } from "@/lib/types"
-import { Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box, Clock } from "lucide-react"
+import { 
+    Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box, Clock,
+    Gauge, Compass, BatteryCharging, Zap, Database, Layers, Flame, Workflow,
+    Waves, Move, Signal, Fuel, Sun, Bolt, Scaling, RotateCw
+} from "lucide-react"
 
 interface CommandPaletteProps {
   open: boolean
@@ -21,14 +25,32 @@ interface CommandPaletteProps {
 }
 
 const getConverterIcon = (converter: AnyConverter) => {
+    const iconProps = { className: "h-5 w-5 text-accent-foreground" };
     switch (converter.id) {
-        case 'length': return <Ruler className="h-5 w-5 text-accent-foreground" />;
-        case 'mass': return <Weight className="h-5 w-5 text-accent-foreground" />;
-        case 'temperature': return <Thermometer className="h-5 w-5 text-accent-foreground" />;
-        case 'area': return <AreaChart className="h-5 w-5 text-accent-foreground" />;
-        case 'volume': return <Box className="h-5 w-5 text-accent-foreground" />;
-        case 'time': return <Clock className="h-5 w-5 text-accent-foreground" />;
-        default: return <Sparkles className="h-5 w-5 text-accent-foreground" />;
+        case 'length': return <Ruler {...iconProps}/>;
+        case 'mass': return <Weight {...iconProps}/>;
+        case 'temperature': return <Thermometer {...iconProps}/>;
+        case 'area': return <AreaChart {...iconProps}/>;
+        case 'volume': return <Box {...iconProps}/>;
+        case 'time': return <Clock {...iconProps}/>;
+        case 'speed': return <Gauge {...iconProps}/>;
+        case 'pressure': return <Scaling {...iconProps}/>;
+        case 'energy': return <Flame {...iconProps}/>;
+        case 'power': return <Bolt {...iconProps}/>;
+        case 'force': return <Move {...iconProps}/>;
+        case 'angle': return <Compass {...iconProps}/>;
+        case 'frequency': return <Signal {...iconProps}/>;
+        case 'data-storage': return <Database {...iconProps}/>;
+        case 'fuel-consumption': return <Fuel {...iconProps}/>;
+        case 'acceleration': return <Gauge {...iconProps}/>;
+        case 'charge': return <BatteryCharging {...iconProps}/>;
+        case 'current': return <Zap {...iconProps}/>;
+        case 'density': return <Layers {...iconProps}/>;
+        case 'flow-mass': return <Workflow {...iconProps}/>;
+        case 'flow-volume': return <Waves {...iconProps}/>;
+        case 'illumination': return <Sun {...iconProps}/>;
+        case 'torque': return <RotateCw {...iconProps}/>;
+        default: return <Sparkles {...iconProps}/>;
     }
 }
 
@@ -100,3 +122,5 @@ export function CommandPalette({
     </Dialog>
   )
 }
+
+    
