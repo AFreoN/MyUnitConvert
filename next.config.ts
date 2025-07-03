@@ -1,11 +1,11 @@
 
 import type {NextConfig} from 'next';
 
-const repoName = 'myunitconvert';
+const repoName = 'MyUnitConvert';
 
 const nextConfig: NextConfig = {
   output: 'export',
-  // If your repository is named something else, change 'myunitconvert' to your repository name.
+  // If your repository is named something else, change 'MyUnitConvert' to your repository name.
   basePath: `/${repoName}`,
   assetPrefix: `/${repoName}/`,
   typescript: {
