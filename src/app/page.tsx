@@ -281,7 +281,7 @@ export default function OmniConvertPage() {
             <div className="bg-primary p-2 rounded-lg">
                 <CodeXml className="text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-headline font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
+            <h1 className="text-2xl font-headline font-bold bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text group-data-[collapsible=icon]:hidden">
               MyUnitConvert
             </h1>
           </div>
