@@ -3,7 +3,7 @@ import type { DataConverter, UnitConverter, AnyConverter } from '@/lib/types';
 
 // --- Data Format Converters ---
 
-const dataConverters: DataConverter[] = [
+export const dataConverters: DataConverter[] = [
     {
         id: 'json-to-yaml',
         name: 'JSON to YAML',
@@ -121,12 +121,14 @@ const dataConverters: DataConverter[] = [
 
 // --- Unit Converters ---
 
-const unitConverters: UnitConverter[] = [
+export const unitConverters: UnitConverter[] = [
     {
         id: 'length',
         name: 'Length',
         description: 'Convert between different units of length.',
         type: 'unit',
+        defaultFrom: 'ft',
+        defaultTo: 'm',
         units: [
             { id: 'm', name: 'Metre', toBase: v => v, fromBase: v => v },
             { id: 'km', name: 'Kilometre', toBase: v => v * 1000, fromBase: v => v / 1000 },
@@ -140,6 +142,8 @@ const unitConverters: UnitConverter[] = [
         name: 'Mass',
         description: 'Convert between different units of mass.',
         type: 'unit',
+        defaultFrom: 'lb',
+        defaultTo: 'kg',
         units: [
             { id: 'kg', name: 'Kilogram', toBase: v => v, fromBase: v => v },
             { id: 'g', name: 'Gram', toBase: v => v / 1000, fromBase: v => v * 1000 },
@@ -153,6 +157,8 @@ const unitConverters: UnitConverter[] = [
         name: 'Area',
         description: 'Convert between different units of area.',
         type: 'unit',
+        defaultFrom: 'sqft',
+        defaultTo: 'sqm',
         units: [
             { id: 'sqm', name: 'Square Metre', toBase: v => v, fromBase: v => v },
             { id: 'sqft', name: 'Square Foot', toBase: v => v * 0.092903, fromBase: v => v / 0.092903 },
@@ -165,6 +171,8 @@ const unitConverters: UnitConverter[] = [
         name: 'Volume',
         description: 'Convert between different units of volume.',
         type: 'unit',
+        defaultFrom: 'us-gal',
+        defaultTo: 'l',
         units: [
             { id: 'l', name: 'Litre', toBase: v => v, fromBase: v => v },
             { id: 'ml', name: 'Millilitre', toBase: v => v / 1000, fromBase: v => v * 1000 },
@@ -178,6 +186,8 @@ const unitConverters: UnitConverter[] = [
         name: 'Temperature',
         description: 'Convert between different units of temperature.',
         type: 'unit',
+        defaultFrom: 'c',
+        defaultTo: 'f',
         units: [
             { id: 'c', name: 'Celsius', toBase: v => v, fromBase: v => v },
             { id: 'f', name: 'Fahrenheit', toBase: v => (v - 32) * 5/9, fromBase: v => (v * 9/5) + 32 },
@@ -186,4 +196,4 @@ const unitConverters: UnitConverter[] = [
     }
 ];
 
-export const allConverters: AnyConverter[] = [...dataConverters, ...unitConverters];
+export const allConverters: AnyConverter[] = [...unitConverters, ...dataConverters];

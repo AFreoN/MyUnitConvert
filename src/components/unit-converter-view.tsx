@@ -5,13 +5,7 @@ import * as React from "react"
 import type { UnitConverter, Unit } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Combobox } from "@/components/ui/combobox"
 import { ArrowRightLeft } from "lucide-react"
 import { Button } from "./ui/button"
 
@@ -28,17 +22,24 @@ const formatNumber = (num: number): string => {
     }
     // Limit decimals for floats
     if (num % 1 !== 0) {
-        return num.toFixed(Math.min(8, (num.toString().split('.')[1] || '').length));
+      const parts = num.toString().split('.');
+      const decimalLength = parts[1] ? parts[1].length : 0;
+      return num.toFixed(Math.min(8, decimalLength));
     }
     return num.toString();
 };
 
-
 export function UnitConverterView({ converter }: UnitConverterViewProps) {
-  const [unit1, setUnit1] = React.useState<string>(converter.units[0].id)
-  const [unit2, setUnit2] = React.useState<string>(converter.units[1].id)
+  const [unit1, setUnit1] = React.useState<string>(converter.defaultFrom || converter.units[0].id)
+  const [unit2, setUnit2] = React.useState<string>(converter.defaultTo || converter.units[1].id)
   const [value1, setValue1] = React.useState<string>("1")
   const [value2, setValue2] = React.useState<string>("")
+  const [lastChanged, setLastChanged] = React.useState<"value1" | "value2">("value1")
+
+  const unitOptions = React.useMemo(() => 
+    converter.units.map((u) => ({ value: u.id, label: u.name })),
+    [converter.units]
+  );
 
   const getUnit = React.useCallback(
     (id: string): Unit | undefined => converter.units.find((u) => u.id === id),
@@ -58,75 +59,67 @@ export function UnitConverterView({ converter }: UnitConverterViewProps) {
     [getUnit]
   )
     
-  // Effect to calculate initial value and on unit changes
+  // Effect to perform conversion when inputs change
   React.useEffect(() => {
-    const fromVal = parseFloat(value1);
-    if (!isNaN(fromVal)) {
-        const result = convertValue(fromVal, unit1, unit2);
-        if (result !== null) {
-            setValue2(formatNumber(result));
+    if (lastChanged === 'value1') {
+        const fromVal = parseFloat(value1);
+        if (!isNaN(fromVal)) {
+            const result = convertValue(fromVal, unit1, unit2);
+            if (result !== null) {
+                setValue2(formatNumber(result));
+            } else {
+                setValue2('');
+            }
         } else {
             setValue2('');
         }
-    } else {
-        setValue2('');
     }
-  }, [unit1, unit2, value1, convertValue]);
+  }, [unit1, unit2, value1, convertValue, lastChanged]);
+  
+  React.useEffect(() => {
+    if (lastChanged === 'value2') {
+        const fromVal = parseFloat(value2);
+        if (!isNaN(fromVal)) {
+            const result = convertValue(fromVal, unit2, unit1);
+            if (result !== null) {
+                setValue1(formatNumber(result));
+            } else {
+                setValue1('');
+            }
+        } else {
+            setValue1('');
+        }
+    }
+  }, [unit1, unit2, value2, convertValue, lastChanged]);
 
 
   const handleValue1Change = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setValue1(val)
-    const num = parseFloat(val)
-    if (!isNaN(num)) {
-      const result = convertValue(num, unit1, unit2)
-      if (result !== null) {
-        setValue2(formatNumber(result))
-      } else {
-        setValue2("")
-      }
-    } else {
-      setValue2("")
-    }
+    setValue1(e.target.value)
+    setLastChanged("value1");
   }
 
   const handleValue2Change = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value
-    setValue2(val)
-    const num = parseFloat(val)
-    if (!isNaN(num)) {
-      const result = convertValue(num, unit2, unit1)
-      if (result !== null) {
-        setValue1(formatNumber(result))
-      } else {
-        setValue1("")
-      }
-    } else {
-      setValue1("")
-    }
+    setValue2(e.target.value)
+    setLastChanged("value2");
   }
   
   const handleSwap = () => {
+    const tempUnit = unit1;
     setUnit1(unit2);
-    setUnit2(unit1);
+    setUnit2(tempUnit);
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
         <Card className="shadow-md">
             <CardContent className="p-4 flex flex-col gap-2">
-                <Select value={unit1} onValueChange={setUnit1}>
-                <SelectTrigger>
-                    <SelectValue placeholder="Select unit" />
-                </SelectTrigger>
-                <SelectContent>
-                    {converter.units.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                        {u.name}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-                </Select>
+                <Combobox
+                  options={unitOptions}
+                  value={unit1}
+                  onValueChange={setUnit1}
+                  placeholder="Select unit"
+                  searchPlaceholder="Search units..."
+                />
                 <Input
                     type="number"
                     value={value1}
@@ -143,25 +136,19 @@ export function UnitConverterView({ converter }: UnitConverterViewProps) {
 
         <Card className="shadow-md">
             <CardContent className="p-4 flex flex-col gap-2">
-                <Select value={unit2} onValueChange={setUnit2}>
-                <SelectTrigger>
-                    <SelectValue placeholder="Select unit" />
-                </SelectTrigger>
-                <SelectContent>
-                    {converter.units.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                        {u.name}
-                    </SelectItem>
-                    ))}
-                </SelectContent>
-                </Select>
+                <Combobox
+                  options={unitOptions}
+                  value={unit2}
+                  onValueChange={setUnit2}
+                  placeholder="Select unit"
+                  searchPlaceholder="Search units..."
+                />
                 <Input
                     type="number"
                     value={value2}
                     onChange={handleValue2Change}
                     placeholder="Result"
                     className="text-lg"
-                    readOnly={false} // Allow user to edit this field too
                 />
             </CardContent>
         </Card>

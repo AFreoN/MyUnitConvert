@@ -20,6 +20,8 @@ export interface UnitConverter {
   description: string;
   type: 'unit';
   units: Unit[];
+  defaultFrom?: string;
+  defaultTo?: string;
 }
 
 export type AnyConverter = DataConverter | UnitConverter;

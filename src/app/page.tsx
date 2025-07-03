@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { detectFormat, type DetectFormatOutput } from "@/ai/flows/auto-detect-conversion"
-import { allConverters } from "@/lib/converters"
+import { allConverters, dataConverters, unitConverters } from "@/lib/converters"
 import type { AnyConverter, DataConverter, UnitConverter } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { CommandPalette } from "@/components/command-palette"
@@ -22,6 +22,8 @@ import {
   SidebarMenuButton,
   SidebarProvider,
   SidebarTrigger,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
@@ -62,7 +64,7 @@ export default function OmniConvertPage() {
     React.useState<DetectFormatOutput | null>(null)
   const [isDetecting, setIsDetecting] = React.useState(false)
   const [selectedConverter, setSelectedConverter] =
-    React.useState<AnyConverter | null>(allConverters[0])
+    React.useState<AnyConverter | null>(unitConverters[0])
   const [commandPaletteOpen, setCommandPaletteOpen] = React.useState(false)
   const [sidebarSearch, setSidebarSearch] = React.useState("")
   const [copied, setCopied] = React.useState(false)
@@ -181,11 +183,13 @@ export default function OmniConvertPage() {
     })
   }
 
-  const filteredConverters = allConverters.filter((c) =>
+  const filteredUnitConverters = unitConverters.filter((c) =>
     c.name.toLowerCase().includes(sidebarSearch.toLowerCase())
   )
 
-  const isDataConverter = selectedConverter?.type === 'data';
+  const filteredDataConverters = dataConverters.filter((c) =>
+    c.name.toLowerCase().includes(sidebarSearch.toLowerCase())
+  );
 
   return (
     <SidebarProvider>
@@ -218,20 +222,40 @@ export default function OmniConvertPage() {
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu>
-            {filteredConverters.map((converter) => (
-              <SidebarMenuItem key={converter.id}>
-                <SidebarMenuButton
-                  onClick={() => setSelectedConverter(converter)}
-                  isActive={selectedConverter?.id === converter.id}
-                  tooltip={converter.name}
-                >
-                  {getConverterIcon(converter)}
-                  <span>{converter.name}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          <SidebarGroup>
+            <SidebarGroupLabel>Unit Converters</SidebarGroupLabel>
+            <SidebarMenu>
+              {filteredUnitConverters.map((converter) => (
+                <SidebarMenuItem key={converter.id}>
+                  <SidebarMenuButton
+                    onClick={() => setSelectedConverter(converter)}
+                    isActive={selectedConverter?.id === converter.id}
+                    tooltip={converter.name}
+                  >
+                    {getConverterIcon(converter)}
+                    <span>{converter.name}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>Data Converters</SidebarGroupLabel>
+            <SidebarMenu>
+              {filteredDataConverters.map((converter) => (
+                <SidebarMenuItem key={converter.id}>
+                  <SidebarMenuButton
+                    onClick={() => setSelectedConverter(converter)}
+                    isActive={selectedConverter?.id === converter.id}
+                    tooltip={converter.name}
+                  >
+                    {getConverterIcon(converter)}
+                    <span>{converter.name}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
         </SidebarContent>
       </Sidebar>
       <SidebarInset className="p-4 md:p-6">
