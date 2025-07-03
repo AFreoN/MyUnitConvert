@@ -282,7 +282,7 @@ export default function OmniConvertPage() {
                 <CodeXml className="text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-headline font-bold text-primary-foreground group-data-[collapsible=icon]:hidden">
-              OmniConvert
+              MyUnitConvert
             </h1>
           </div>
           <div className="relative group-data-[collapsible=icon]:hidden">
