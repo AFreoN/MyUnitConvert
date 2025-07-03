@@ -292,7 +292,7 @@ export default function OmniConvertPage() {
         </header>
         
         {selectedConverter?.type === 'unit' && (
-            <UnitConverterView converter={selectedConverter as UnitConverter} />
+            <UnitConverterView key={selectedConverter.id} converter={selectedConverter as UnitConverter} />
         )}
 
         {selectedConverter?.type === 'data' && (

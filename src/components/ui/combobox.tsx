@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -62,7 +63,7 @@ export function Combobox({
           aria-expanded={open}
           className="w-full justify-between font-normal"
         >
-          {value ? selectedLabel : placeholder}
+          <span className="block truncate">{value ? selectedLabel : placeholder}</span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
