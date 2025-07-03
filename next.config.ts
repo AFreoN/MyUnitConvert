@@ -26,14 +26,18 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  env: {
+    // Pass the gh-pages flag to the client-side code
+    NEXT_PUBLIC_IS_GHPAGES: isGithubActions ? "true" : "",
+  },
   // Add the basePath and assetPrefix only when building for GH Pages
   ...(isGithubActions && {
     basePath: `/${repo}`,
     assetPrefix: `/${repo}/`,
   }),
   // Add webpack config to stub out server actions for static export
-  webpack: (config, { isServer }) => {
-    if (process.env.NEXT_PUBLIC_IS_GHPAGES === 'true') {
+  webpack: (config) => {
+    if (isGithubActions) {
       config.resolve.alias = {
         ...config.resolve.alias,
         '@/ai/flows/auto-detect-conversion': path.resolve(
