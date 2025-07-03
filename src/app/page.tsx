@@ -2,7 +2,7 @@
 "use client"
 
 import * as React from "react"
-import { detectFormat, type DetectFormatOutput } from "@/ai/flows/auto-detect-conversion"
+import type { DetectFormatOutput } from "@/ai/flows/auto-detect-conversion"
 import { allConverters, dataConverters, unitConverters } from "@/lib/converters"
 import type { AnyConverter, DataConverter, UnitConverter } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -136,17 +136,35 @@ export default function OmniConvertPage() {
 
   // Debounce for AI detection for data converters
   React.useEffect(() => {
-    if (selectedConverter?.type !== 'data' || !inputData.trim()) {
+    // On GitHub Pages, this feature is disabled because Server Actions are not supported.
+    if (process.env.NEXT_PUBLIC_IS_GHPAGES) {
       setIsDetecting(false)
       setDetectedFormat(null)
       return
     }
+
+    if (selectedConverter?.type !== "data" || !inputData.trim()) {
+      setIsDetecting(false)
+      setDetectedFormat(null)
+      return
+    }
+
     setIsDetecting(true)
     const handler = setTimeout(() => {
-      detectFormat({ inputData })
-        .then(setDetectedFormat)
-        .catch(console.error)
-        .finally(() => setIsDetecting(false))
+      const runDetection = async () => {
+        try {
+          const { detectFormat } = await import(
+            "@/ai/flows/auto-detect-conversion"
+          )
+          const result = await detectFormat({ inputData })
+          setDetectedFormat(result)
+        } catch (err) {
+          console.error(err)
+        } finally {
+          setIsDetecting(false)
+        }
+      }
+      runDetection()
     }, 500)
 
     return () => clearTimeout(handler)
