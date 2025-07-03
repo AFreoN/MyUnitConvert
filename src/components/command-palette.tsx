@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { allConverters } from "@/lib/converters"
 import type { AnyConverter } from "@/lib/types"
-import { Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box } from "lucide-react"
+import { Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box, Clock } from "lucide-react"
 
 interface CommandPaletteProps {
   open: boolean
@@ -27,6 +27,7 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'temperature': return <Thermometer className="h-5 w-5 text-accent-foreground" />;
         case 'area': return <AreaChart className="h-5 w-5 text-accent-foreground" />;
         case 'volume': return <Box className="h-5 w-5 text-accent-foreground" />;
+        case 'time': return <Clock className="h-5 w-5 text-accent-foreground" />;
         default: return <Sparkles className="h-5 w-5 text-accent-foreground" />;
     }
 }

@@ -42,6 +42,7 @@ import {
   Thermometer,
   AreaChart,
   Box,
+  Clock,
 } from "lucide-react"
 
 // Helper to get an icon for a converter type
@@ -52,6 +53,7 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'temperature': return <Thermometer />;
         case 'area': return <AreaChart />;
         case 'volume': return <Box />;
+        case 'time': return <Clock />;
         default: return <Sparkles />;
     }
 }
@@ -69,6 +71,7 @@ export default function OmniConvertPage() {
   const [sidebarSearch, setSidebarSearch] = React.useState("")
   const [copied, setCopied] = React.useState(false)
   const [shared, setShared] = React.useState(false)
+  const [commandKey, setCommandKey] = React.useState("⌘")
 
   // Debounce for AI detection for data converters
   React.useEffect(() => {
@@ -166,6 +169,16 @@ export default function OmniConvertPage() {
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
   }, [])
+
+  // Set platform-specific command key
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isMac = /(Mac|iPhone|iPod|iPad)/i.test(
+        navigator.userAgentData?.platform || navigator.platform
+      );
+      setCommandKey(isMac ? "⌘" : "Ctrl");
+    }
+  }, []);
   
   const handleCopy = (text: string, type: "output" | "share") => {
     navigator.clipboard.writeText(text).then(() => {
@@ -273,7 +286,7 @@ export default function OmniConvertPage() {
             >
               Jump to converter...
               <kbd className="ml-4 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                <span className="text-xs">⌘</span>K
+                <span className="text-xs">{commandKey}</span>K
               </kbd>
             </Button>
         </header>
