@@ -136,13 +136,6 @@ export default function OmniConvertPage() {
 
   // Debounce for AI detection for data converters
   React.useEffect(() => {
-    // On GitHub Pages, this feature is disabled because Server Actions are not supported.
-    if (process.env.NEXT_PUBLIC_IS_GHPAGES) {
-      setIsDetecting(false)
-      setDetectedFormat(null)
-      return
-    }
-
     if (selectedConverter?.type !== "data" || !inputData.trim()) {
       setIsDetecting(false)
       setDetectedFormat(null)
@@ -153,9 +146,12 @@ export default function OmniConvertPage() {
     const handler = setTimeout(() => {
       const runDetection = async () => {
         try {
-          const { detectFormat } = await import(
-            "@/ai/flows/auto-detect-conversion"
-          )
+          const isGhPages = process.env.NEXT_PUBLIC_IS_GHPAGES === "true";
+          const modulePath = isGhPages
+            ? "@/ai/flows/auto-detect-conversion.dummy"
+            : "@/ai/flows/auto-detect-conversion";
+          
+          const { detectFormat } = await import(modulePath);
           const result = await detectFormat({ inputData })
           setDetectedFormat(result)
         } catch (err) {
