@@ -68,6 +68,8 @@ import {
   Type,
   CircuitBoard,
   Lightbulb,
+  FileCode,
+  Sheet,
 } from "lucide-react"
 
 // Helper to get an icon for a converter type
@@ -105,6 +107,14 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'typography': return <Type />;
         case 'inductance': return <CircuitBoard />;
         case 'electric-conductance': return <Lightbulb />;
+        case 'json-to-xml':
+        case 'xml-to-json':
+        case 'yaml-to-xml':
+        case 'xml-to-yaml':
+            return <FileCode />;
+        case 'json-to-csv':
+        case 'csv-to-json':
+            return <Sheet />;
         default: return <Sparkles />;
     }
 }
@@ -454,5 +464,3 @@ export default function OmniConvertPage() {
     </SidebarProvider>
   )
 }
-
-    

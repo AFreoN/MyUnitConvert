@@ -1,6 +1,21 @@
 
 import { parse, stringify } from 'yaml';
+import { XMLParser, XMLBuilder } from 'fast-xml-parser';
+import Papa from 'papaparse';
 import type { DataConverter, UnitConverter, AnyConverter } from '@/lib/types';
+
+// --- XML and CSV parsers ---
+const xmlParser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_",
+});
+const xmlBuilder = new XMLBuilder({
+    format: true,
+    indentBy: '  ',
+    ignoreAttributes: false,
+    attributeNamePrefix: "@_",
+});
+
 
 // --- Data Format Converters ---
 
@@ -35,6 +50,122 @@ export const dataConverters: DataConverter[] = [
                  if (e instanceof Error) return `{\n  "error": "Could not parse YAML: ${e.message}"\n}`;
                  return `{\n  "error": "Could not parse YAML"\n}`;
             }
+        },
+    },
+    {
+        id: 'json-to-xml',
+        name: 'JSON to XML',
+        description: 'Convert JSON data to XML format.',
+        type: 'data',
+        convert: async (input) => {
+            try {
+                if (!input.trim()) return '';
+                const obj = JSON.parse(input);
+                const rootKey = Object.keys(obj).length === 1 ? Object.keys(obj)[0] : 'root';
+                const wrappedObj = rootKey === 'root' ? { root: obj } : obj;
+                return xmlBuilder.build(wrappedObj);
+            } catch (e) {
+                if (e instanceof Error) return `<error>Invalid JSON: ${e.message}</error>`;
+                return '<error>Invalid JSON input</error>';
+            }
+        },
+    },
+    {
+        id: 'xml-to-json',
+        name: 'XML to JSON',
+        description: 'Convert XML data to JSON format.',
+        type: 'data',
+        convert: async (input) => {
+            try {
+                if (!input.trim()) return '';
+                const obj = xmlParser.parse(input);
+                return JSON.stringify(obj, null, 2);
+            } catch (e) {
+                if (e instanceof Error) return `{\n  "error": "Could not parse XML: ${e.message}"\n}`;
+                return `{\n  "error": "Could not parse XML"\n}`;
+            }
+        },
+    },
+     {
+        id: 'yaml-to-xml',
+        name: 'YAML to XML',
+        description: 'Convert YAML data to XML format.',
+        type: 'data',
+        convert: async (input) => {
+            try {
+                if (!input.trim()) return '';
+                const obj = parse(input);
+                const rootKey = Object.keys(obj).length === 1 ? Object.keys(obj)[0] : 'root';
+                const wrappedObj = rootKey === 'root' ? { root: obj } : obj;
+                return xmlBuilder.build(wrappedObj);
+            } catch (e) {
+                if (e instanceof Error) return `<error>Could not parse YAML: ${e.message}</error>`;
+                return '<error>Could not parse YAML</error>';
+            }
+        },
+    },
+    {
+        id: 'xml-to-yaml',
+        name: 'XML to YAML',
+        description: 'Convert XML data to YAML format.',
+        type: 'data',
+        convert: async (input) => {
+            try {
+                if (!input.trim()) return '';
+                const obj = xmlParser.parse(input);
+                return stringify(obj);
+            } catch (e) {
+                if (e instanceof Error) return `# Could not parse XML: ${e.message}`;
+                return '# Could not parse XML';
+            }
+        },
+    },
+    {
+        id: 'json-to-csv',
+        name: 'JSON to CSV',
+        description: 'Convert an array of JSON objects to CSV.',
+        type: 'data',
+        convert: async (input) => {
+            try {
+                if (!input.trim()) return '';
+                const obj = JSON.parse(input);
+                if (!Array.isArray(obj)) {
+                    throw new Error("Input must be a JSON array of objects.");
+                }
+                return Papa.unparse(obj);
+            } catch (e) {
+                if (e instanceof Error) return `Error: ${e.message}`;
+                return 'Error converting JSON to CSV.';
+            }
+        },
+    },
+    {
+        id: 'csv-to-json',
+        name: 'CSV to JSON',
+        description: 'Convert CSV data to an array of JSON objects.',
+        type: 'data',
+        convert: async (input) => {
+            return new Promise((resolve) => {
+                if (!input.trim()) {
+                    resolve('');
+                    return;
+                }
+                Papa.parse(input, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => {
+                        if(results.errors.length) {
+                            const errorMsg = results.errors.map(e => e.message).join(', ');
+                            resolve(`{\n  "error": "Could not parse CSV: ${errorMsg}"\n}`);
+                        } else {
+                            resolve(JSON.stringify(results.data, null, 2));
+                        }
+                    },
+                    error: (error) => {
+                        resolve(`{\n  "error": "Could not parse CSV: ${error.message}"\n}`);
+                    }
+                });
+            });
         },
     },
     {
@@ -600,5 +731,3 @@ export const unitConverters: UnitConverter[] = [
 ];
 
 export const allConverters: AnyConverter[] = [...unitConverters, ...dataConverters];
-
-    

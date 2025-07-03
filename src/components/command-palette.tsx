@@ -16,7 +16,8 @@ import {
     Search, Sparkles, Ruler, Weight, Thermometer, AreaChart, Box, Clock,
     Gauge, Compass, BatteryCharging, Zap, Database, Layers, Flame, Workflow,
     Waves, Move, Signal, Fuel, Sun, Bolt, Scaling, RotateCw, ArrowRightLeft,
-    ScanLine, Monitor, Magnet, AlertTriangle, Volume2, Type, CircuitBoard, Lightbulb
+    ScanLine, Monitor, Magnet, AlertTriangle, Volume2, Type, CircuitBoard, Lightbulb,
+    FileCode, Sheet
 } from "lucide-react"
 
 interface CommandPaletteProps {
@@ -60,6 +61,14 @@ const getConverterIcon = (converter: AnyConverter) => {
         case 'typography': return <Type {...iconProps}/>;
         case 'inductance': return <CircuitBoard {...iconProps}/>;
         case 'electric-conductance': return <Lightbulb {...iconProps}/>;
+        case 'json-to-xml':
+        case 'xml-to-json':
+        case 'yaml-to-xml':
+        case 'xml-to-yaml':
+            return <FileCode {...iconProps}/>;
+        case 'json-to-csv':
+        case 'csv-to-json':
+            return <Sheet {...iconProps}/>;
         default: return <Sparkles {...iconProps}/>;
     }
 }
@@ -132,5 +141,3 @@ export function CommandPalette({
     </Dialog>
   )
 }
-
-    
