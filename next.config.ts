@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
   }),
   // Add webpack config to stub out server actions for static export
   webpack: (config, { isServer }) => {
-    if (process.env.NEXT_PUBLIC_IS_GHPAGES === 'true' && !isServer) {
+    if (process.env.NEXT_PUBLIC_IS_GHPAGES === 'true') {
       config.resolve.alias = {
         ...config.resolve.alias,
         '@/ai/flows/auto-detect-conversion': path.resolve(
