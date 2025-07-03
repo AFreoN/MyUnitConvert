@@ -129,10 +129,23 @@ export const dataConverters: DataConverter[] = [
             try {
                 if (!input.trim()) return '';
                 const obj = JSON.parse(input);
+                
+                let dataToConvert = obj;
+
                 if (!Array.isArray(obj)) {
-                    throw new Error("Input must be a JSON array of objects.");
+                    if (typeof obj === 'object' && obj !== null) {
+                        const arrayKey = Object.keys(obj).find(key => Array.isArray(obj[key]));
+                        if (arrayKey) {
+                            dataToConvert = obj[arrayKey];
+                        }
+                    }
                 }
-                return Papa.unparse(obj);
+
+                if (!Array.isArray(dataToConvert)) {
+                    throw new Error("Input must be a JSON array, or an object containing a top-level array.");
+                }
+                
+                return Papa.unparse(dataToConvert);
             } catch (e) {
                 if (e instanceof Error) return `Error: ${e.message}`;
                 return 'Error converting JSON to CSV.';
